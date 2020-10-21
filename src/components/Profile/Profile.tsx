@@ -12,7 +12,8 @@ import * as Yup from "yup";
 const Profile = () => {
     const [data, setData] = useState({email: '', name: ''});
     const [isAuth, setIsAuth] = useState(true);
-    const [isChangePassword, setIsChangePassword] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
+    const [isChangeName, setIsChangeName] = useState(false);
 
     useEffect(() => {
         const axios = new HTTPWrapper();
@@ -20,7 +21,7 @@ const Profile = () => {
             .then(res => {
                 setData(res.data.data);
             })
-    }, [])
+    }, [isChangeName])
 
     const exit = () => {
         const axios = new HTTPWrapper();
@@ -32,11 +33,11 @@ const Profile = () => {
     }
 
     const changePassword = () => {
-        setIsChangePassword(true);
+        setOpenModal(true);
     }
 
     if (!isAuth) {
-        return <Redirect to={'/login'}/>
+        return <Redirect to={'/oziapp'}/>
     }
     return (
         <React.Fragment>
@@ -45,50 +46,47 @@ const Profile = () => {
                 <p>Name: {data.name}</p>
             </div>
             <div className={'profile-buttons'}>
-                <button className={'profile-buttons_btn'} onClick={changePassword}>Изменить пароль</button>
-                <button onClick={exit} className={'profile-buttons_btn exit-btn'}>Выйти</button>
+                <button className={'profile-buttons_btn'} onClick={changePassword}>Change name</button>
+                <button onClick={exit} className={'profile-buttons_btn exit-btn'}>Exit</button>
             </div>
 
-            <Dialog onClose={() => {setIsChangePassword(false)}} aria-labelledby="customized-dialog-title"
-                    open={isChangePassword}>
+            <Dialog onClose={() => {setOpenModal(false)}} aria-labelledby="customized-dialog-title"
+                    open={openModal}>
                 <DialogTitle id="customized-dialog-title" >
                     Modal title
                 </DialogTitle>
-                <DialogContent style={{width: '600px'}} dividers>
+                <DialogContent className={'dialog-content'} dividers>
                     <Typography>
                         <Formik
                             initialValues={{
-                                oldPassword: '',
-                                password: '',
+                                text: '',
                             }}
                             validationSchema={Yup.object().shape({
-                                oldPassword: Yup.string()
-                                    .min(4, 'Password must be at least 4 characters')
-                                    .required('Old password is required'),
-                                password: Yup.string()
-                                    .min(4, 'Password must be at least 4 characters')
-                                    .required('New password is required'),
+                                newName: Yup.string()
+                                    .min(4, 'Username must be at least 4 characters')
+                                    .required('Field is required'),
                             })}
                             onSubmit={(fields: any) => {
-                                const data = {
-                                    oldPassword: fields.oldPassword,
-                                    password: fields.password,
+                                setIsChangeName(false)
+                                const fetch = new HTTPWrapper();
+                                const dataToSend = {
+                                    name: fields.newName,
                                     clientId: 1,
+                                    email: data.email
                                 }
-                                console.log(data)
+                                fetch.put('api/tager/user/profile', dataToSend)
+                                    .then((res) => {
+                                        setIsChangeName(true);
+                                        setOpenModal(false);
+                                    })
                             }}
                             render={({ errors, touched }) => (
                                 <Form>
-                                    <label htmlFor="oldPassword">Old password</label>
-                                    <Field name="oldPassword" type="password" className={'form-control' + (errors.password && touched.password ? ' is-invalid' : '')} />
-                                    <ErrorMessage name="oldPassword" component="div" className="invalid-feedback" />
+                                    <label htmlFor="newName">New name</label>
+                                    <Field name="newName" type="text" className={'form-control' + (errors.text && touched.text ? ' is-invalid' : '')} />
+                                    <ErrorMessage name="newName" component="div" className="invalid-feedback" />
 
-
-                                    <label htmlFor="password">New Password</label>
-                                    <Field name="password" type="password" className={'form-control' + (errors.password && touched.password ? ' is-invalid' : '')} />
-                                    <ErrorMessage name="password" component="div" className="invalid-feedback" />
-
-                                    <button type="submit" className="btn btn-primary changePassword-btn">Login</button>
+                                    <button type="submit" className="btn btn-primary changePassword-btn">Save</button>
                                 </Form>
                             )}
                         />

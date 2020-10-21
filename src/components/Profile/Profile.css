@@ -2,6 +2,9 @@
   display: flex!important;
   margin: 30px auto;
 }
+.dialog-content {
+  width: 600px;
+}
 .profile-wrapper form {
   width: 50%;
   margin: auto;
@@ -37,5 +40,15 @@
 }
 .profile-buttons .exit-btn {
   margin-left: 20px;
+}
+@media (max-width: 480px) {
+  .dialog-content {
+    width: 400px;
+  }
+}
+@media (max-width: 400px) {
+  .dialog-content {
+    width: 280px;
+  }
 }
 /*# sourceMappingURL=Profile.css.map */
